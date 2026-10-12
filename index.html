@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ルート・チェンジ</title>
 <style>
-:root{--bg:#0f1220;--panel:#1a1f36;--ink:#e8ebf7;--mut:#8e96b8;--acc:#5eead4;--gold:#fbbf24;--bad:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}:root:not([data-theme="light"]){color-scheme:dark}
+:root{--bg:#0f1220;--panel:#1a1f36;--ink:#e8ebf7;--mut:#8e96b8;--acc:#5eead4;--gold:#fbbf24;--bad:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;background-image:radial-gradient(circle at 20% 0,#1f2650 0,transparent 50%)}
 .wrap{max-width:1100px;margin:0 auto;padding:12px}
@@ -15,7 +15,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
 section{background:var(--panel);border-radius:12px;padding:12px;margin-top:12px}
 h2{font-size:13px;color:var(--mut);margin:0 0 8px;letter-spacing:.05em}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
-.card{width:130px;min-height:150px;border-radius:10px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;background:#252b4a;border:2px solid #3a4272;transition:.15s;position:relative}
+.card{width:130px;min-height:150px;border-radius:10px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;background:#252b4a;border:2px solid #3a4272;transition:.15s;position:relative;overflow:hidden}
 .card .t{font-weight:700;font-size:15px}
 .card .s{color:var(--mut);font-size:11px}
 .card .pt{color:var(--gold);font-weight:700}
@@ -26,10 +26,9 @@ h2{font-size:13px;color:var(--mut);margin:0 0 8px;letter-spacing:.05em}
 .card.mol{border-color:var(--acc);background:#16403f}
 .card.ok{box-shadow:0 0 0 3px var(--gold),0 0 18px var(--gold)}
 .card button{padding:4px 8px;font-size:12px;margin-top:6px}
-.mk .card{cursor:pointer}.mk .card:hover:not(.dis){transform:translateY(-6px);border-color:var(--acc)}.deck{color:var(--mut);font-size:13px;display:flex;flex-direction:column;justify-content:center;padding:6px}
+.mk .card{cursor:pointer}.mk .card:hover:not(.dis){transform:translateY(-6px);border-color:var(--acc)}.deck{color:var(--mut);font-size:13px;display:flex;flex-direction:column;justify-content:center;padding:10px;min-width:110px;border:1px dashed #3a4272;border-radius:10px}
 #log{font-size:13px;color:var(--mut);min-height:20px;margin-top:10px}
-#pass{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:20;text-align:center}#pass button{font-size:18px;padding:12px 28px}#modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:25}
-#modal .box{background:var(--panel);border-radius:12px;padding:12px;max-width:720px;color:var(--ink)}
+#pass{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:20;text-align:center}#pass button{font-size:18px;padding:12px 28px}#modal{position:fixed;inset:0;background:rgba(15,18,32,.75);display:none;align-items:center;justify-content:center;z-index:30}#modal .box{background:var(--panel);border-radius:12px;padding:12px;max-width:720px;color:var(--ink)}
 
 html{-webkit-text-size-adjust:100%}button,.card{touch-action:manipulation}
 @media (hover:none){.hand .card:hover:not(.dis),.mk .card:hover:not(.dis){transform:none;border-color:inherit;box-shadow:none}}
@@ -82,18 +81,20 @@ const RULES=[
 {reagent:"酸化",input:"アセトアルデヒド",output:"酢酸"},{reagent:"濃硫酸(脱水)",input:"酢酸",requiredField:"エタノール",output:"酢酸エチル"},
 {reagent:"混酸(ニトロ化)",input:"ベンゼン",output:"ニトロベンゼン"},{reagent:"還元(Sn+HCl)",input:"ニトロベンゼン",output:"アニリン"},
 {reagent:"アルカリ融解等",input:"ベンゼン",output:"フェノール"},{reagent:"CO2加圧",input:"フェノール",output:"サリチル酸"},{reagent:"無水酢酸",input:"サリチル酸",requiredField:"メタノール",output:"サリチル酸メチル"},
+{reagent:"酸化",input:"メタノール",output:"ホルムアルデヒド"},{reagent:"還元",input:"ホルムアルデヒド",output:"メタノール"},
 {reagent:"濃硫酸(脱水)",input:"エタノール",requiredField:"エタノール",output:"ジエチルエーテル"},{reagent:"付加重合",input:"エチレン",output:"ポリエチレン"},
 {reagent:"乾留(酢酸Ca)",input:"酢酸",output:"アセトン"},{reagent:"アルキル化(CH3Cl)",input:"ベンゼン",output:"トルエン"},
 {reagent:"KMnO4酸化",input:"トルエン",output:"安息香酸"},{reagent:"ジアゾ化(NaNO2+HCl)",input:"アニリン",output:"塩化ベンゼンジアゾニウム"},
 {reagent:"カップリング",input:"塩化ベンゼンジアゾニウム",output:"アゾ染料"},{reagent:"無水酢酸",input:"アニリン",output:"アセトアニリド"},
 {reagent:"加水(H2O・加水分解)",input:"酢酸エチル",output:"酢酸",output2:"エタノール"},{reagent:"加水(H2O・加水分解)",input:"サリチル酸メチル",output:"サリチル酸",output2:"メタノール"},
 {reagent:"加水(H2O・加水分解)",input:"アスピリン",output:"サリチル酸",output2:"酢酸"},{reagent:"加水(H2O・加水分解)",input:"アセトアニリド",output:"アニリン",output2:"酢酸"}];
-const DET=[{card:"銀鏡反応",allowed:["アセトアルデヒド"]},{card:"ヨードホルム反応",allowed:["アセトン","エタノール","アセトアルデヒド"]},{card:"塩化鉄(III)",allowed:["フェノール","サリチル酸","アスピリン"]}];
+const DET=[{card:"銀鏡反応",allowed:["アセトアルデヒド"]},{card:"ヨードホルム反応",allowed:["アセトン","エタノール","アセトアルデヒド"]},{card:"塩化鉄(III)",allowed:["フェノール","サリチル酸","アスピリン","アゾ染料"]},{card:"ブドウ糖",allowed:["ホルムアルデヒド"]}];
 const $=id=>document.getElementById(id);
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const byName=n=>Object.values(M).find(m=>m.name===n);
 let S,ADV=false,VS_CPU=false,AI=false;
-let WIN_TARGET=40;
+const MAX_WIN_TARGET=990;
+let WIN_TARGET=MAX_WIN_TARGET;
 const blocked=()=>VS_CPU&&S.cur===1&&!AI;
 const nm=()=>VS_CPU&&S.cur===1?"CPU":`プレイヤー${S.cur+1}`;
 function init(){
@@ -101,7 +102,7 @@ function init(){
  [...new Set(RULES.map(r=>r.reagent))].forEach(n=>add("reag",n,n==="酸化"?4:(n==="濃硫酸(脱水)"||n==="加水(H2O・加水分解)")?3:2));
  add("mat","エタノール",4);add("mat","メタノール",2);add("unk","？",5);DET.forEach(d=>add("det",d.card,2));
  const goals=shuf(Object.values(M).filter(m=>m.rank>0).map(m=>m.name));
- S={mols:["エチレン"],sel:0,unk:false,score:0,turn:1,ac:2,deck:shuf(deck),market:[],disc:[],hand:[],goals,open:goals.splice(0,3),secret:[],over:false,log:"ゲーム開始！ エチレンから始める。"};
+ S={mols:["エチレン"],sel:0,unk:false,score:0,turn:1,ac:2,deck:shuf(deck),market:[],disc:[],hand:[],goals,open:goals.splice(0,3),secret:[],over:false,log:"ゲーム開始！ エチレンから始めます。"};
  Object.defineProperty(S,"mol",{get(){return this.mols[this.sel]},set(v){this.mols[this.sel]=v}});
  S.P=[0,1].map(()=>{const p={mols:["エチレン"],sel:0,unk:false,score:0,grp:[],hand:[],secret:S.goals.splice(0,2)};drawFor(p,5);return p;});
  S.round=1;S.cur=0;load(0);refill();say("対戦開始！ プレイヤー1の先攻（初回ドローなし）。");render();if(!VS_CPU)showPass();
@@ -147,7 +148,7 @@ function play(c){
 }
 function pickCost(c,out){
  $("mq").textContent=`「${out}」に確定。コストで捨てる手札を選択`;$("mb").innerHTML="";
- S.hand.filter(h=>h.id!==c.id).forEach(h=>{const b=document.createElement("button");b.textContent=h.name;b.onclick=()=>{drop(h);drop(c);S.mol=out;S.unk=false;spend();say(`？ → ${out} に進化！`);closeM();render()};$("mb").appendChild(b)});
+ S.hand.filter(h=>h.id!==c.id).forEach(h=>{const b=document.createElement("button");b.textContent=h.name;b.onclick=()=>{drop(h);drop(c);S.mol=out;S.unk=false;spend();say(`？ → ${out} に進化！`);closeM();render()}});
 }
 function canRule(r,c){return r.reagent===c.name&&r.input===S.mol&&(!r.requiredField||S.mols.some((m,i)=>i!==S.sel&&m===r.requiredField))&&(!r.output2||S.mols.length<3)}
 function removeOther(n){const j=S.mols.findIndex((m,i)=>i!==S.sel&&m===n);if(j>=0){S.mols.splice(j,1);if(j<S.sel)S.sel--}}
@@ -175,15 +176,9 @@ function endTurn(){
 $("end").onclick=()=>{if(S.over)return showStart();if(blocked())return;endTurn()};
 function showStart(){
  const d=$("pass");d.style.display="flex";
- d.innerHTML=`<div style="max-width:600px"><h1>⚗️ ルート・チェンジ</h1><p style="color:var(--mut)">勝利点数を選択（10点単位）</p><div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px">
-  <button id="dec" style="padding:6px 10px">◀</button>
-  <div id="target" style="min-width:84px;text-align:center;font-weight:700">${WIN_TARGET} 点</div>
-  <button id="inc" style="padding:6px 10px">▶</button>
- </div>
- <p style="color:var(--mut)">VSモードを選択</p>
- <div style="margin-top:8px"><button id="b2">2人対戦</button> <button id="b1" style="margin-left:8px">CPUと対戦</button></div></div>`;
+ d.innerHTML=`<div style="max-width:600px"><h1>⚗️ ルート・チェンジ</h1><p style="color:var(--mut)">勝利点数を選択（10点単位）</p><div style="display:flex;align-items:center;justify-content:center;gap:12px"><button id="dec" style="padding:6px 10px">◀</button><div id="target" style="min-width:84px;text-align:center;font-weight:700">${WIN_TARGET} 点</div><button id="inc" style="padding:6px 10px">▶</button></div><p style="color:var(--mut)">VSモードを選択</p><div style="margin-top:8px"><button id="b2">2人対戦</button> <button id="b1" style="margin-left:8px">CPUと対戦</button></div></div>`;
  $("dec").onclick=()=>{WIN_TARGET=Math.max(10,WIN_TARGET-10);$("target").textContent=WIN_TARGET+" 点";};
- $("inc").onclick=()=>{WIN_TARGET=Math.min(50,WIN_TARGET+10);$("target").textContent=WIN_TARGET+" 点";};
+ $("inc").onclick=()=>{WIN_TARGET=Math.min(MAX_WIN_TARGET,WIN_TARGET+10);$("target").textContent=WIN_TARGET+" 点";};
  $("b2").onclick=()=>{VS_CPU=false;d.style.display="none";init()};
  $("b1").onclick=()=>{VS_CPU=true;d.style.display="none";init()};
 }
@@ -207,7 +202,7 @@ function cpuAct(){
  if(S.mols.length<3)for(const c of S.hand.filter(h=>h.type==="mat")){
   const need=RULES.some(r=>r.requiredField===c.name&&S.mols.includes(r.input));
   if(!S.mols.includes(c.name)&&(need||dist(c.name,T)<base)){play(c);return true}}
- if(base>=99){if(S.mols.length>1){S.mols.splice(worst,1);S.sel=0}else{S.mols=[dist("エチレン",T)<=dist("ベンゼン",T)?"エチレン":"ベンゼン"];S.sel=0}spend();say("CPUが分子を破棄しました。");return true}
+ if(base>=99){if(S.mols.length>1){S.mols.splice(worst,1);S.sel=0}else{S.mols=[dist("エチレン",T)<=dist("ベンゼン",T)?"エチレン":"ベンゼン"];S.sel=0}spend();say("CPUが分子を破棄して、出発物質からやり直した。");return true}
  const sc=c=>c.type==="reag"?(RULES.some(r=>r.reagent===c.name&&S.mols.includes(r.input))?3:1):c.type==="det"?(DET.find(d=>d.card===c.name).allowed.some(a=>T.includes(a))?2:0):c.type==="mat"?(S.mols.length<3&&(!S.mols.includes(c.name))?2:0):0;
  let bi=-1,bs=0;S.market.forEach((c,i)=>{if(sc(c)>bs){bs=sc(c);bi=i}});if(bi>=0){take(bi);return true}
  return false;
@@ -226,7 +221,7 @@ function playable(c){
 function goalCard(n,kind,i,secret){
  const m=byName(n),ok=S.mols.includes(n)&&!S.over,d=document.createElement("div");
  d.className="card"+(ok?" ok":"");
- d.innerHTML=`<div><div class="s">${"★".repeat(m.rank)} ${secret?"裏ゴール +3":"+2"}</div><div class="t">${n}</div>${fm(n)}<div class="s">${m.group}</div></div><div><span class="pt">${m.score}</span><button ${ok?"":"disabled"}>達成</button></div>`;
+ d.innerHTML=`<div><div class="s">${"★".repeat(m.rank)} ${secret?"裏ゴール +3":"+2"}</div><div class="t">${n}</div>${fm(n)}<div class="s">${m.group}</div></div><div><span class="pt">${m.score}</span><button ${!S.mols.includes(n)||S.over?"disabled":""}>達成</button></div>`;
  d.querySelector("button").onclick=()=>claim(kind,i);return d;
 }
 function render(){
@@ -264,7 +259,7 @@ function render(){
  if(VS_CPU&&S.cur===1&&!S.over){$("hand").innerHTML=`<div class="deck">CPUの手札 ${S.hand.length}枚（非公開）</div>`;s.innerHTML=`<div class="deck">CPUの裏ゴール（非公開）</div>`}
 }
 const LAB={reag:"試薬",det:"検出薬",unk:"未知",mat:"素材"};
-const FORM={"エチレン":"CH2=CH2","ベンゼン":"C6H6","エタノール":"C2H5OH","アセトアルデヒド":"CH3CHO","ニトロベンゼン":"C6H5NO2","酢酸":"CH3COOH","アセトン":"CH3COCH3","アニリン":"C6H5NH2","フェノール":"C6H5OH","サリチル酸":"HO-C6H4-COOH","トルエン":"C6H5CH3","安息香酸":"C6H5COOH","アセトアニリド":"CH3CONHC6H5","アゾ染料":"Ar-N=N-Ar","酢酸エチル":"CH3COOC2H5","サリチル酸メチル":"HO-C6H4-COOCH3","ジエチルエーテル":"C2H5OC2H5"};
+const FORM={"エチレン":"CH2=CH2","ベンゼン":"C6H6","エタノール":"C2H5OH","アセトアルデヒド":"CH3CHO","ニトロベンゼン":"C6H5NO2","酢酸":"CH3COOH","アセトン":"CH3COCH3","アニリン":"C6H5NH2","フェノール":"C6H5OH","サリチル酸":"o-HOC6H4COOH","ホルムアルデヒド":"HCHO","酢酸エチル":"CH3COOC2H5","ジエチルエーテル":"C2H5OC2H5","ポリエチレン":"-(CH2CH2)-n","トルエン":"C6H5CH3","安息香酸":"C6H5COOH","塩化ベンゼンジアゾニウム":"C6H5N2Cl","アゾ染料":"Ar-N=N-Ar","アセトアニリド":"CH3CONHC6H5","サリチル酸メチル":"o-HOC6H4COOCH3","アスピリン":"o-CH3COOC6H4COOH"};
 const fm=n=>!ADV&&FORM[n]?`<div class="s" style="color:var(--acc)">${FORM[n]}</div>`:"";
 $("mode").onclick=()=>{ADV=!ADV;render()};
 function hint(c){
