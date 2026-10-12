@@ -93,6 +93,8 @@ const $=id=>document.getElementById(id);
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const byName=n=>Object.values(M).find(m=>m.name===n);
 let S,ADV=false,VS_CPU=false,AI=false;
+let WIN_TARGET=40;
+const TARGET_OPTIONS=[10,20,30,40,50];
 const blocked=()=>VS_CPU&&S.cur===1&&!AI;
 const nm=()=>VS_CPU&&S.cur===1?"CPU":`プレイヤー${S.cur+1}`;
 function init(){
@@ -160,7 +162,7 @@ function claim(kind,i){
  if(!S.grp.includes(m.group)){S.grp.push(m.group);if(S.grp.length===2){S.score+=3;ex="＋系統ボーナス3（脂肪族・芳香族を両方達成）"}}
  say(`${n} 達成！ +${m.score}+ボーナス${bonus}${ex} ／追加行動+1`);
  if(S.goals.length)list[i]=S.goals.pop();else list.splice(i,1);
- if(S.score>=40){S.over=true;say(`🎉 勝利！ ${nm()} の勝利！（${S.round}ラウンド）`)}
+ if(S.score>=WIN_TARGET){S.over=true;say(`🎉 勝利！ ${nm()} の勝利！（${S.round}ラウンド）`)}
  render();
 }
 function endTurn(){
@@ -168,10 +170,13 @@ function endTurn(){
  save();const n=1-S.cur;load(n);if(n===0)S.round++;S.ac=2;draw(1);
  say(`${nm()}の番。1枚ドロー。`);render();if(VS_CPU){if(n===1)runCpu()}else showPass()}
 $("end").onclick=()=>{if(S.over)return showStart();if(blocked())return;endTurn()};
-function showStart(){const d=$("pass");d.style.display="flex";
- d.innerHTML=`<div><h1>⚗️ ルート・チェンジ</h1><p style="color:var(--mut)">対戦モードを選んでください</p><button id="b2">2人で対戦（ローカル）</button> <button id="b1">1人で対戦（CPU）</button></div>`;
+function showStart(){
+ const d=$("pass");d.style.display="flex";
+ d.innerHTML=`<div><h1>⚗️ ルート・チェンジ</h1><p style="color:var(--mut)">勝利点数を選択（10点単位）</p><div id="targetBtns" style="margin-bottom:8px"></div><p style="color:var(--mut)">対戦モードを選んでください</p><button id="b2">2人で対戦（ローカル）</button> <button id="b1">1人で対戦（CPU）</button></div>`;
+ const tb=$("targetBtns");TARGET_OPTIONS.forEach(t=>{const b=document.createElement("button");b.textContent=t+" 点";b.style.marginRight="6px";b.onclick=()=>{WIN_TARGET=t;Array.from(tb.children).forEach(x=>x.style.opacity=1);b.style.opacity=0.6;};if(t===WIN_TARGET)b.style.opacity=0.6;tb.appendChild(b)});
  $("b2").onclick=()=>{VS_CPU=false;d.style.display="none";init()};
- $("b1").onclick=()=>{VS_CPU=true;d.style.display="none";init()}}
+ $("b1").onclick=()=>{VS_CPU=true;d.style.display="none";init()};
+}
 const EDG=n=>[...RULES.filter(r=>r.input===n).flatMap(r=>[r.output,r.output2].filter(Boolean))];
 function dist(a,T){if(T.includes(a))return 0;const seen=new Set([a]);let q=[[a,0]];
  while(q.length){const[n,d]=q.shift();for(const e of EDG(n)){if(seen.has(e))continue;if(T.includes(e))return d+1;seen.add(e);q.push([e,d+1])}}return 99}
@@ -216,7 +221,7 @@ function goalCard(n,kind,i,secret){
 }
 function render(){
  const op=S.P[1-S.cur];
- $("pl").innerHTML=`<b>P${S.cur+1}</b> の番　自分 <b>${S.score}</b> / 40　相手 <b>${op.score}</b>　達成系統: ${S.grp.join("・")||"なし"}`;$("tn").textContent=S.round;
+ $("pl").innerHTML=`<b>P${S.cur+1}</b> の番　自分 <b>${S.score}</b> / ${WIN_TARGET}　相手 <b>${op.score}</b>　達成系統: ${S.grp.join("・")||"なし"}`;$("tn").textContent=S.round;
  $("opp").innerHTML=`<div class="card"><div><div class="s">P${2-S.cur}の分子</div><div class="t" style="font-size:13px">${op.mols.join("・")}</div></div><div class="s">「？」: ${op.unk?"あり":"なし"}</div></div>`;
  $("ac").textContent=S.ac;
  $("mode").textContent=ADV?"上級者モード（ヒントなし）":"通常モード（ヒント＋示性式）";$("end").textContent=S.over?"もう一度遊ぶ":"ターン終了";$("log").textContent=S.log;
@@ -254,7 +259,8 @@ const fm=n=>!ADV&&FORM[n]?`<div class="s" style="color:var(--acc)">${FORM[n]}</d
 $("mode").onclick=()=>{ADV=!ADV;render()};
 function hint(c){
  if(ADV&&["reag","det"].includes(c.type))return "";
- if(c.type==="reag")return RULES.filter(r=>r.reagent===c.name).map(r=>r.input+"→"+r.output+(r.requiredField?"（要:場の"+r.requiredField+"）":"")+(r.output2?" ＋"+r.output2:"")).join("<br>");
+ if(c.type==="reag")return RULES.filter(r=>r.reagent===c.name).map(r=>r.input+"→"+r.output+(r.requiredField?"（要:場の"+r.requiredField+"）":"")+(r.output2?" ＋"+r.output2:""))
+ .join("<br>");
  if(c.type==="det")return "→ "+DET.find(d=>d.card===c.name).allowed.join("/");
  if(c.type==="mat")return "ラボに出す（最大3つ）";return "未知分子を設置";
 }
