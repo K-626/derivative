@@ -162,7 +162,7 @@ function claim(kind,i){
  if(!S.grp.includes(m.group)){S.grp.push(m.group);if(S.grp.length===2){S.score+=3;ex="＋系統ボーナス3（脂肪族・芳香族を両方達成）"}}
  say(`${n} 達成！ +${m.score}+ボーナス${bonus}${ex} ／追加行動+1`);
  if(S.goals.length)list[i]=S.goals.pop();else list.splice(i,1);
- if(S.score>=20){S.over=true;say(`🎉 勝利！ ${nm()} の勝利！（${S.round}ラウンド）`)}
+ if(S.score>=40){S.over=true;say(`🎉 勝利！ ${nm()} の勝利！（${S.round}ラウンド）`)}
  render();
 }
 function endTurn(){
