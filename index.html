@@ -93,7 +93,7 @@ const $=id=>document.getElementById(id);
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const byName=n=>Object.values(M).find(m=>m.name===n);
 let S,ADV=false,VS_CPU=false,AI=false;
-const MAX_WIN_TARGET=990;
+const MAX_WIN_TARGET=100;
 let WIN_TARGET=MAX_WIN_TARGET;
 const blocked=()=>VS_CPU&&S.cur===1&&!AI;
 const nm=()=>VS_CPU&&S.cur===1?"CPU":`プレイヤー${S.cur+1}`;
