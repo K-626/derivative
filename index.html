@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -29,7 +30,6 @@ h2{font-size:13px;color:var(--mut);margin:0 0 8px;letter-spacing:.05em}
 .mk .card{cursor:pointer}.mk .card:hover:not(.dis){transform:translateY(-6px);border-color:var(--acc)}.deck{color:var(--mut);font-size:13px;display:flex;flex-direction:column;justify-content:center;padding:10px;min-width:110px;border:1px dashed #3a4272;border-radius:10px}
 #log{font-size:13px;color:var(--mut);min-height:20px;margin-top:10px}
 #pass{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:20;text-align:center}#pass button{font-size:18px;padding:12px 28px}#modal{position:fixed;inset:0;background:rgba(15,18,32,.75);display:none;align-items:center;justify-content:center;z-index:30}#modal .box{background:var(--panel);border-radius:12px;padding:12px;max-width:720px;color:var(--ink)}
-
 html{-webkit-text-size-adjust:100%}button,.card{touch-action:manipulation}
 @media (hover:none){.hand .card:hover:not(.dis),.mk .card:hover:not(.dis){transform:none;border-color:inherit;box-shadow:none}}
 @media (max-width:700px){
@@ -94,7 +94,7 @@ const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i]
 const byName=n=>Object.values(M).find(m=>m.name===n);
 let S,ADV=false,VS_CPU=false,AI=false;
 const MAX_WIN_TARGET=100;
-let WIN_TARGET=MAX_WIN_TARGET;
+let WIN_TARGET=100;
 const blocked=()=>VS_CPU&&S.cur===1&&!AI;
 const nm=()=>VS_CPU&&S.cur===1?"CPU":`プレイヤー${S.cur+1}`;
 function init(){
@@ -109,7 +109,7 @@ function init(){
 }
 function drawFor(p,n){while(n--){const c=pullFromDeck();if(c)p.hand.push(c)}}
 function save(){S.P[S.cur]={mols:S.mols,sel:S.sel,unk:S.unk,score:S.score,grp:S.grp,hand:S.hand,secret:S.secret}}
-function load(i){S.cur=i;Object.assign(S,S.P[i]);S.hand=S.P[i].hand;}
+function load(i){S.cur=i;Object.assign(S,S.P[i]);S.hand=S.P[i].hand}
 function showPass(){const d=$("pass");d.style.display="flex";
  d.innerHTML=`<div><h1>プレイヤー${S.cur+1} の番</h1><p style="color:var(--mut)">手札と裏ゴールが表示されます。相手は画面を見ないでください。</p><button>準備OK</button></div>`;
  d.querySelector("button").onclick=()=>d.style.display="none"}
@@ -122,7 +122,11 @@ function take(i){
  const c=i<0?pull():S.market.splice(i,1)[0];if(!c)return;
  S.hand.push(c);spend();refill();say(i<0?"山札のトップから1枚獲得。":`市場から「${c.name}」を獲得。市場を補充。`);render();
 }
-function drop(c){S.hand=S.hand.filter(x=>x.id!==c.id);S.disc.push(c)}
+function drop(c){
+ S.hand=S.hand.filter(x=>x.id!==c.id);
+ S.disc.push(c);
+ if(S.P&&S.P[S.cur]) S.P[S.cur].hand=S.hand;
+}
 function say(t){S.log=t;$("log").textContent=t}
 function spend(){S.ac--}
 function play(c){
@@ -141,14 +145,38 @@ function play(c){
   if(S.hand.length<2)return say("コストとして捨てる手札が足りません。");
   const d=DET.find(d=>d.card===c.name);
   $("mq").textContent=`${c.name}：確定する分子を選択（他の手札1枚を消費）`;
-  $("mb").innerHTML="";d.allowed.forEach(n=>{const b=document.createElement("button");b.textContent=n;b.onclick=()=>pickCost(c,n);$("mb").appendChild(b)});
+  $("mb").innerHTML="";
+  d.allowed.forEach(n=>{const b=document.createElement("button");b.textContent=n;b.onclick=()=>pickCost(c,n);$("mb").appendChild(b)});
   $("modal").style.display="flex";return;
  }
  render();
 }
 function pickCost(c,out){
- $("mq").textContent=`「${out}」に確定。コストで捨てる手札を選択`;$("mb").innerHTML="";
- S.hand.filter(h=>h.id!==c.id).forEach(h=>{const b=document.createElement("button");b.textContent=h.name;b.onclick=()=>{drop(h);drop(c);S.mol=out;S.unk=false;spend();say(`？ → ${out} に進化！`);closeM();render()}});
+ $("mq").textContent=`「${out}」に確定。コストで捨てる手札を選択`;
+ $("mb").innerHTML="";
+ const costs=S.hand.filter(h=>h.id!==c.id);
+ if(!costs.length){
+  $("mq").textContent="捨てる手札がありません。";
+  return;
+ }
+ costs.forEach(h=>{
+  const b=document.createElement("button");
+  b.textContent=`${h.name} を捨てる`;
+  b.onclick=()=>{
+   const reagent=S.hand.find(x=>x.id===c.id);
+   const cost=S.hand.find(x=>x.id===h.id);
+   if(!reagent||!cost||reagent.id===cost.id)return;
+   drop(cost);
+   drop(reagent);
+   S.mol=out;
+   S.unk=false;
+   spend();
+   say(`？ → ${out} に進化！ 検出薬と「${h.name}」を捨て札にした。`);
+   closeM();
+   render();
+  };
+  $("mb").appendChild(b);
+ });
 }
 function canRule(r,c){return r.reagent===c.name&&r.input===S.mol&&(!r.requiredField||S.mols.some((m,i)=>i!==S.sel&&m===r.requiredField))&&(!r.output2||S.mols.length<3)}
 function removeOther(n){const j=S.mols.findIndex((m,i)=>i!==S.sel&&m===n);if(j>=0){S.mols.splice(j,1);if(j<S.sel)S.sel--}}
@@ -177,8 +205,8 @@ $("end").onclick=()=>{if(S.over)return showStart();if(blocked())return;endTurn()
 function showStart(){
  const d=$("pass");d.style.display="flex";
  d.innerHTML=`<div style="max-width:600px"><h1>⚗️ ルート・チェンジ</h1><p style="color:var(--mut)">勝利点数を選択（10点単位）</p><div style="display:flex;align-items:center;justify-content:center;gap:12px"><button id="dec" style="padding:6px 10px">◀</button><div id="target" style="min-width:84px;text-align:center;font-weight:700">${WIN_TARGET} 点</div><button id="inc" style="padding:6px 10px">▶</button></div><p style="color:var(--mut)">VSモードを選択</p><div style="margin-top:8px"><button id="b2">2人対戦</button> <button id="b1" style="margin-left:8px">CPUと対戦</button></div></div>`;
- $("dec").onclick=()=>{WIN_TARGET=Math.max(10,WIN_TARGET-10);$("target").textContent=WIN_TARGET+" 点";};
- $("inc").onclick=()=>{WIN_TARGET=Math.min(MAX_WIN_TARGET,WIN_TARGET+10);$("target").textContent=WIN_TARGET+" 点";};
+ $("dec").onclick=()=>{WIN_TARGET=Math.max(10,WIN_TARGET-10);$("target").textContent=WIN_TARGET+" 点"};
+ $("inc").onclick=()=>{WIN_TARGET=Math.min(MAX_WIN_TARGET,WIN_TARGET+10);$("target").textContent=WIN_TARGET+" 点"};
  $("b2").onclick=()=>{VS_CPU=false;d.style.display="none";init()};
  $("b1").onclick=()=>{VS_CPU=true;d.style.display="none";init()};
 }
